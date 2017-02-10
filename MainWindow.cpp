@@ -19,6 +19,13 @@ MainWindow(QWidget *parent)
 
   screenshots_layout_ = new FlowLayout(ui_->screenshots_area_contents);
   ui_->screenshots_area_contents->setLayout(screenshots_layout_);
+
+  connect(&support_requester_, &SupportRequester::log,
+          this, &MainWindow::appendLog);
+  connect(&support_requester_, &SupportRequester::finished,
+          this, &MainWindow::processFinished);
+  connect(&support_requester_, &SupportRequester::failed,
+          this, &MainWindow::processFailed);
 }
 //--------------------------------------------------------------------------------------------------
 MainWindow::
@@ -156,5 +163,44 @@ on_take_screenshot_btn_clicked()
     screenshots_layout_->addWidget(preview);
     screenshots_.append(pixmap);
   }
+}
+//--------------------------------------------------------------------------------------------------
+void
+MainWindow::
+on_make_request_btn_clicked()
+{
+  ui_->console_text_edit->clear();
+  RequestContext ctx;
+  ctx.subject = ui_->subject_edit->text();
+  ctx.body = ui_->body_edit->toPlainText();
+  ctx.email = ui_->email_edit->text();
+  ctx.phone = ui_->phone_edit->text();
+  ctx.company = ui_->company_edit->text();
+  ctx.screenshots = screenshots_;
+  support_requester_.start(ctx);
+  ui_->make_request_btn->setEnabled(false);
+}
+//--------------------------------------------------------------------------------------------------
+void
+MainWindow::
+appendLog(QString const& message)
+{
+  ui_->console_text_edit->appendPlainText(message);
+}
+//--------------------------------------------------------------------------------------------------
+void
+MainWindow::
+processFinished()
+{
+  appendLog("Процесс успешно завершен!");
+  ui_->make_request_btn->setEnabled(true);
+}
+//--------------------------------------------------------------------------------------------------
+void
+MainWindow::
+processFailed(QString const& message)
+{
+  appendLog(QString("ОШИБКА! %1").arg(message));
+  ui_->make_request_btn->setEnabled(true);
 }
 //--------------------------------------------------------------------------------------------------

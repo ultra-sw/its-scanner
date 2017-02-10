@@ -1,4 +1,5 @@
 #pragma once
+#include "SupportRequester.h"
 #include <QMainWindow>
 #include <QList>
 #include <QPixmap>
@@ -15,7 +16,7 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget* parent = 0);
+  explicit MainWindow(QWidget* parent = nullptr);
 
   ~MainWindow();
 
@@ -28,6 +29,18 @@ private slots:
 
   void
   on_take_screenshot_btn_clicked();
+
+  void
+  on_make_request_btn_clicked();
+
+  void
+  appendLog(QString const& message);
+
+  void
+  processFinished();
+
+  void
+  processFailed(QString const& message);
 
 private:
   void
@@ -43,5 +56,7 @@ private:
   QList<QPixmap> screenshots_;
   QList<QLabel> screenshot_perviews_;
   FlowLayout* screenshots_layout_;
+
+  SupportRequester support_requester_;
 };
 //--------------------------------------------------------------------------------------------------

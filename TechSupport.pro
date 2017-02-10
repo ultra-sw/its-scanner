@@ -51,7 +51,9 @@ SOURCES += main.cpp\
     qsmtp/mimepart.cpp \
     qsmtp/mimetext.cpp \
     qsmtp/quotedprintable.cpp \
-    qsmtp/smtpclient.cpp
+    qsmtp/smtpclient.cpp \
+    FileDownloader.cpp \
+    SupportRequester.cpp
 
 HEADERS  += MainWindow.h \
     FlowLayout.h \
@@ -84,6 +86,8 @@ HEADERS  += MainWindow.h \
     qsmtp/quotedprintable.h \
     qsmtp/smtpclient.h \
     qsmtp/smtpexports.h \
-    qsmtp/SmtpMime
+    qsmtp/SmtpMime \
+    FileDownloader.h \
+    SupportRequester.h
 
 FORMS    += MainWindow.ui
