@@ -87,7 +87,7 @@ void
 ScreenshotLabel::
 mousePressEvent(QMouseEvent* event)
 {
-  if(event->button() == Qt::LeftButton)
+  if(event->button() == Qt::LeftButton && close_overlay_rect_.contains(event->pos()))
     this->deleteLater();
 }
 //--------------------------------------------------------------------------------------------------

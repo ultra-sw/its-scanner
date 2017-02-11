@@ -5,14 +5,19 @@
 #include <QProcess>
 #include <QList>
 #include <QPixmap>
+#include <QDateTime>
 //--------------------------------------------------------------------------------------------------
 class FileDownloader;
 class QProcess;
 //--------------------------------------------------------------------------------------------------
 struct RequestContext
 {
+  enum ProblemPlace {UNKNOWN_PLACE, THIS_COMPUTER, ANOTHER_COMPUTER};
+  ProblemPlace place = UNKNOWN_PLACE;
+  QDateTime incident_time;
   QString subject;
   QString body;
+  QString name;
   QString email;
   QString phone;
   QString company;

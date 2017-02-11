@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>607</width>
-    <height>479</height>
+    <width>500</width>
+    <height>438</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,7 +29,7 @@
        <enum>QFrame::Sunken</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="contacts_page">
        <layout class="QFormLayout" name="formLayout">
@@ -45,6 +45,9 @@
         </item>
         <item row="0" column="1">
          <widget class="QLineEdit" name="name_edit">
+          <property name="text">
+           <string>Иванов Иван Иванович</string>
+          </property>
           <property name="placeholderText">
            <string>Иванов Иван Иванович</string>
           </property>
@@ -62,6 +65,9 @@
         </item>
         <item row="1" column="1">
          <widget class="QLineEdit" name="company_edit">
+          <property name="text">
+           <string>ООО &quot;Рога и Копыта&quot;</string>
+          </property>
           <property name="placeholderText">
            <string>ООО &quot;Рога и Копыта&quot;</string>
           </property>
@@ -79,6 +85,9 @@
         </item>
         <item row="2" column="1">
          <widget class="QLineEdit" name="phone_edit">
+          <property name="text">
+           <string>+7 123 4567890</string>
+          </property>
           <property name="placeholderText">
            <string>+7 123 4567890</string>
           </property>
@@ -100,7 +109,7 @@
            <string/>
           </property>
           <property name="text">
-           <string/>
+           <string>ivanov@example.com</string>
           </property>
           <property name="placeholderText">
            <string>ivanov@example.com</string>
@@ -113,6 +122,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QLineEdit" name="subject_edit">
+          <property name="text">
+           <string>Ничего не работает</string>
+          </property>
           <property name="placeholderText">
            <string>Кратко опишите проблему, например, &lt;не печатает принтер&gt; или &lt;пропал доступ к сайтам в интернет&gt;</string>
           </property>
@@ -166,19 +178,18 @@
            </widget>
           </item>
           <item>
-           <widget class="QDateEdit" name="incident_date_edit">
+           <widget class="QDateTimeEdit" name="incident_time_edit">
+            <property name="minimumSize">
+             <size>
+              <width>152</width>
+              <height>22</height>
+             </size>
+            </property>
             <property name="displayFormat">
-             <string>ddd MMM d yyyy</string>
+             <string>ddd MMM d yyyy HH:mm</string>
             </property>
             <property name="calendarPopup">
              <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QTimeEdit" name="incident_time_edit">
-            <property name="displayFormat">
-             <string>HH:mm</string>
             </property>
            </widget>
           </item>
@@ -189,7 +200,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>0</width>
               <height>20</height>
              </size>
             </property>
@@ -205,7 +216,16 @@
          </widget>
         </item>
         <item>
-         <widget class="QTextEdit" name="body_edit"/>
+         <widget class="QTextEdit" name="body_edit">
+          <property name="html">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:12px; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:12px;&quot;&gt;Ничего не работает!&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:12px;&quot;&gt;Все поломалось, караул, помогите!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -214,7 +234,7 @@
         <item>
          <widget class="QLabel" name="label_8">
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;При необходимости здесь Вы можете прикрепить снимки экрана. Для этого сделайте снимок, нажав кнопку Print Screen на клавиатуре, и нажмите кнопку ниже.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;При необходимости здесь Вы можете прикрепить снимки экрана. Для этого сделайте снимок, нажав кнопку Print Screen на клавиатуре, и нажмите кнопку ниже.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -290,8 +310,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>565</width>
-             <height>274</height>
+             <width>458</width>
+             <height>256</height>
             </rect>
            </property>
           </widget>
@@ -299,7 +319,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="final_page">
+      <widget class="QWidget" name="request_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <widget class="QLabel" name="label_9">
@@ -310,7 +330,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Если все готово, нажмите кнопку &lt;/span&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;&amp;quot;Обратиться в техподдержку&amp;quot;&lt;/span&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;После этого программа соберет дополнительные сведения о системе и отправит заявку в техподдержку.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Если все готово, нажмите кнопку ниже.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;После этого программа соберет дополнительные сведения о системе и отправит заявку в техподдержку.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -391,10 +411,34 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="final_page">
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#5555ff;&quot;&gt;Ваша заявка успешно сформирована и отправлена в техподдержку. В ближайшее время с Вами свяжется специалист.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ООО &amp;quot;Интеграл&amp;quot; &lt;a href=&quot;http://integral-info.ru&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;http://integral-info.ru&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
       <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
@@ -430,11 +474,21 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="close_btn">
+        <property name="text">
+         <string>Закрыть</string>
+        </property>
+        <property name="icon">
+         <iconset resource="TechSupport.qrc">
+          <normaloff>:/resources/Cancel.png</normaloff>:/resources/Cancel.png</iconset>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <action name="exit_action">
    <property name="text">
     <string>Выход</string>
@@ -443,15 +497,41 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
+  <tabstop>subject_edit</tabstop>
+  <tabstop>this_comp_yes_rbtn</tabstop>
+  <tabstop>this_comp_no_rbtn</tabstop>
+  <tabstop>incident_time_edit</tabstop>
+  <tabstop>body_edit</tabstop>
   <tabstop>name_edit</tabstop>
   <tabstop>company_edit</tabstop>
   <tabstop>phone_edit</tabstop>
   <tabstop>email_edit</tabstop>
   <tabstop>prev_btn</tabstop>
   <tabstop>next_btn</tabstop>
+  <tabstop>screenshots_area</tabstop>
+  <tabstop>make_request_btn</tabstop>
+  <tabstop>console_text_edit</tabstop>
+  <tabstop>take_screenshot_btn</tabstop>
  </tabstops>
  <resources>
   <include location="TechSupport.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>close_btn</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>452</x>
+     <y>395</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

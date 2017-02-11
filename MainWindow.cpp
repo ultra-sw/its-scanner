@@ -13,8 +13,14 @@ MainWindow(QWidget *parent)
   , ui_(new Ui::MainWindow)
 {
   ui_->setupUi(this);
+  ui_->close_btn->setVisible(false);
   ui_->prev_btn->setEnabled(false);
   ui_->stacked_widget->setCurrentWidget(ui_->contacts_page);
+
+  ui_->incident_time_edit->setDateTime(QDateTime::currentDateTime());
+  connect(ui_->incident_time_edit, &QDateTimeEdit::dateTimeChanged,
+          this, &MainWindow::onIncidentTimeChanged);
+
   QFont font = ui_->body_edit->font();
   font.setPointSize(font.pointSize()+2);
   ui_->body_edit->setFont(font);
@@ -110,7 +116,7 @@ on_next_btn_clicked()
 {
   if(ui_->stacked_widget->currentWidget() == ui_->contacts_page)
   {
-//    if(checkContactsPage())
+    if(checkContactsPage())
     {
       ui_->stacked_widget->setCurrentWidget(ui_->info_page);
       ui_->prev_btn->setEnabled(true);
@@ -118,12 +124,12 @@ on_next_btn_clicked()
   }
   else if(ui_->stacked_widget->currentWidget() == ui_->info_page)
   {
-//    if(checkInfoPage())
+    if(checkInfoPage())
       ui_->stacked_widget->setCurrentWidget(ui_->screenshots_page);
   }
   else if(ui_->stacked_widget->currentWidget() == ui_->screenshots_page)
   {
-    ui_->stacked_widget->setCurrentWidget(ui_->final_page);
+    ui_->stacked_widget->setCurrentWidget(ui_->request_page);
     ui_->next_btn->setEnabled(false);
   }
 }
@@ -132,7 +138,7 @@ void
 MainWindow::
 on_prev_btn_clicked()
 {
-  if(ui_->stacked_widget->currentWidget() == ui_->final_page)
+  if(ui_->stacked_widget->currentWidget() == ui_->request_page)
   {
     ui_->stacked_widget->setCurrentWidget(ui_->screenshots_page);
     ui_->next_btn->setEnabled(true);
@@ -175,8 +181,14 @@ on_make_request_btn_clicked()
 {
   ui_->console_text_edit->clear();
   RequestContext ctx;
+  if(ui_->this_comp_yes_rbtn->isChecked())
+    ctx.place = RequestContext::THIS_COMPUTER;
+  else if(ui_->this_comp_no_rbtn->isChecked())
+    ctx.place = RequestContext::ANOTHER_COMPUTER;
+  ctx.incident_time = incident_time_;
   ctx.subject = ui_->subject_edit->text();
   ctx.body = ui_->body_edit->toPlainText();
+  ctx.name = ui_->name_edit->text();
   ctx.email = ui_->email_edit->text();
   ctx.phone = ui_->phone_edit->text();
   ctx.company = ui_->company_edit->text();
@@ -186,7 +198,9 @@ on_make_request_btn_clicked()
       ctx.screenshots += label->screenshot();
   }
   support_requester_.start(ctx);
+
   ui_->make_request_btn->setEnabled(false);
+  ui_->prev_btn->setEnabled(false);
 }
 //--------------------------------------------------------------------------------------------------
 void
@@ -200,8 +214,11 @@ void
 MainWindow::
 processFinished()
 {
-  appendLog("Процесс успешно завершен!");
-  ui_->make_request_btn->setEnabled(true);
+  appendLog("Готово!");
+  ui_->next_btn->setVisible(false);
+  ui_->prev_btn->setVisible(false);
+  ui_->close_btn->setVisible(true);
+  ui_->stacked_widget->setCurrentWidget(ui_->final_page);
 }
 //--------------------------------------------------------------------------------------------------
 void
@@ -210,5 +227,13 @@ processFailed(QString const& message)
 {
   appendLog(QString("ОШИБКА! %1").arg(message));
   ui_->make_request_btn->setEnabled(true);
+  ui_->prev_btn->setEnabled(true);
+}
+//--------------------------------------------------------------------------------------------------
+void
+MainWindow::
+onIncidentTimeChanged(QDateTime const& date_time)
+{
+  incident_time_ = date_time;
 }
 //--------------------------------------------------------------------------------------------------

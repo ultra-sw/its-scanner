@@ -42,6 +42,9 @@ private slots:
   void
   processFailed(QString const& message);
 
+  void
+  onIncidentTimeChanged(QDateTime const& date_time);
+
 private:
   void
   setFgColor(QWidget* widget, QColor color);
@@ -53,6 +56,7 @@ private:
   checkInfoPage();
 
   Ui::MainWindow* ui_;
+  QDateTime incident_time_;
   FlowLayout* screenshots_layout_;
 
   SupportRequester support_requester_;

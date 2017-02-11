@@ -6,6 +6,7 @@
 #include <QDataStream>
 #include <QBuffer>
 #include <QStringList>
+#include <QSettings>
 //--------------------------------------------------------------------------------------------------
 SupportRequester::
 SupportRequester(QObject* parent)
@@ -26,7 +27,8 @@ start(RequestContext const& ctx)
     return false;
   ctx_ = ctx;
   emit log("Скачивание компонентов...");
-  downloader_->download(QUrl("http://perchits.integral-info.ru/data/scan.zip"));
+  QSettings settings("TechSupport.ini", QSettings::IniFormat);
+  downloader_->download(QUrl(settings.value("download_url").toString()));
   return true;
 }
 //--------------------------------------------------------------------------------------------------
@@ -36,16 +38,17 @@ fileDownloaded(QByteArray const& data)
 {
   emit log("Распаковка компонентов...");
   QBuffer buffer(const_cast<QByteArray*>(&data));
-  JlCompress::extractDir(&buffer);
+  JlCompress::extractDir(&buffer, tmpdir_.path());
 
   emit log("Запуск сбора данных...");
+  QString report_dir = tmpdir_.path() + QDir::separator() + "Reports";
   QStringList args;
   args.append("/R");
-  args.append("$HOSTNAME_$DATE_FULL");
+  args.append(report_dir + QDir::separator() + "$HOSTNAME_$DATE_FULL");
   args.append("/HTML");
   args.append("/SILENT");
   args.append("/AUDIT");
-  scan_process_->start("aida64.exe", args);
+  scan_process_->start(tmpdir_.path() + QDir::separator() + "aida64.exe", args);
 }
 //--------------------------------------------------------------------------------------------------
 void
@@ -59,26 +62,65 @@ scanProcessFinished(int code, QProcess::ExitStatus status)
   }
 
   emit log("Подготовка отчета...");
-  JlCompress::compressDir("report.zip", "Reports");
+
+  QString report_file = tmpdir_.path() + QDir::separator() + "report.zip";
+  QString report_dir = tmpdir_.path() + QDir::separator() + "Reports";
+  if(!JlCompress::compressDir(report_file, report_dir))
+  {
+    emit failed("Подготовка отчета не удалась.");
+    return;
+  }
 
   emit log("Отправка отчета...");
-  SmtpClient smtp("smtp.gmail.com", 465, SmtpClient::SslConnection);
-  smtp.setUser("perchits@gmail.com");
-  smtp.setPassword("borland1973");
+  QSettings settings("TechSupport.ini", QSettings::IniFormat);
+  QString smtp_auth = settings.value("smtp_auth").toString();
+  SmtpClient::ConnectionType conn_type = SmtpClient::TcpConnection;
+  if(smtp_auth == "ssl")
+    conn_type = SmtpClient::SslConnection;
+  else if(smtp_auth == "tls")
+    conn_type = SmtpClient::TlsConnection;
+  SmtpClient smtp(settings.value("smtp_server").toString(), settings.value("smtp_port").toInt(),
+                  conn_type);
+  smtp.setUser(settings.value("smtp_user").toString());
+  smtp.setPassword(settings.value("smtp_password").toString());
 
   MimeMessage message;
-  message.setSender(new EmailAddress(ctx_.email, ctx_.company));
-  message.addRecipient(new EmailAddress("andperch@yandex.ru", "Андрей Перчиц"));
+  message.setSender(new EmailAddress(ctx_.email, ctx_.name));
+  message.addRecipient(new EmailAddress(settings.value("support_email").toString(), "Техподдержка"));
   message.setSubject(ctx_.subject);
 
   MimeText text;
-  text.setText(QString("%1\r\n\r\n%2\r\nТел: %3").arg(ctx_.body).arg(ctx_.company).arg(ctx_.phone));
+  QString header;
+  if(ctx_.incident_time.isValid())
+    header = QString("Время возникновения проблемы: %1\r\n").arg(ctx_.incident_time.toString());
+  if(ctx_.place != RequestContext::UNKNOWN_PLACE)
+  {
+    header += "Проблема возникла на этом компьютере? ";
+    if(ctx_.place == RequestContext::THIS_COMPUTER)
+      header += "Да.";
+    else if(ctx_.place == RequestContext::THIS_COMPUTER)
+      header += "Нет.";
+  }
+  if(ctx_.incident_time.isValid() || ctx_.place != RequestContext::UNKNOWN_PLACE)
+    header += "\r\n-------------------------------------------------------\r\n\r\n";
+
+  text.setText(QString("%1%2\r\n-------------------------------------------------------\r\n\r\n"
+    "%3\r\nТел: %4").arg(header).arg(ctx_.body).arg(ctx_.company).arg(ctx_.phone));
   message.addPart(&text);
 
-//  MimeAttachment attachment (new QFile("report.zip"));
-//  attachment.setContentType("application/octet-stream");
-  message.addPart(new MimeAttachment(new QFile("report.zip")));
+  message.addPart(new MimeAttachment(new QFile(report_file)));
 
+  int number = 0;
+  for(QPixmap const& screenshot : ctx_.screenshots)
+  {
+    QBuffer buffer;
+    buffer.open(QIODevice::ReadWrite);
+    screenshot.save(&buffer, "PNG");
+    MimeAttachment* attachment =
+        new MimeAttachment(buffer.buffer(), QString("Screenshot%1.png").arg(++number));
+    attachment->setContentType("image/jpeg");
+    message.addPart(attachment);
+  }
 
   if(!smtp.connectToHost())
   {
