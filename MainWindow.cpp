@@ -1,9 +1,11 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "FlowLayout.h"
+#include "ScreenshotLabel.h"
 #include <QMessageBox>
 #include <QRegExp>
 #include <QClipboard>
+#include <QImage>
 //--------------------------------------------------------------------------------------------------
 MainWindow::
 MainWindow(QWidget *parent)
@@ -154,14 +156,16 @@ on_take_screenshot_btn_clicked()
   QPixmap pixmap = clipboard->pixmap();
   if(!pixmap.isNull())
   {
-    QLabel* preview = new QLabel(this);
-    preview->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    preview->setFixedHeight(150);
-    preview->setPixmap(pixmap.scaled(
-      preview->contentsRect().size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
-    preview->adjustSize();
-    screenshots_layout_->addWidget(preview);
-    screenshots_.append(pixmap);
+    QImage clipboard_image = pixmap.toImage();
+    for(QObject* obj : ui_->screenshots_area_contents->children())
+    {
+      if(ScreenshotLabel* label = qobject_cast<ScreenshotLabel*>(obj))
+      {
+        if(clipboard_image == label->screenshot().toImage())
+          return;
+      }
+    }
+    screenshots_layout_->addWidget(new ScreenshotLabel(pixmap, this));
   }
 }
 //--------------------------------------------------------------------------------------------------
@@ -176,7 +180,11 @@ on_make_request_btn_clicked()
   ctx.email = ui_->email_edit->text();
   ctx.phone = ui_->phone_edit->text();
   ctx.company = ui_->company_edit->text();
-  ctx.screenshots = screenshots_;
+  for(QObject* obj : ui_->screenshots_area_contents->children())
+  {
+    if(ScreenshotLabel* label = qobject_cast<ScreenshotLabel*>(obj))
+      ctx.screenshots += label->screenshot();
+  }
   support_requester_.start(ctx);
   ui_->make_request_btn->setEnabled(false);
 }

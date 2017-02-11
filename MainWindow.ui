@@ -253,6 +253,16 @@
             <property name="text">
              <string>Прикрепить снимок экрана</string>
             </property>
+            <property name="icon">
+             <iconset resource="TechSupport.qrc">
+              <normaloff>:/resources/Picture.png</normaloff>:/resources/Picture.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
            </widget>
           </item>
           <item>
@@ -281,7 +291,7 @@
              <x>0</x>
              <y>0</y>
              <width>565</width>
-             <height>275</height>
+             <height>274</height>
             </rect>
            </property>
           </widget>
@@ -345,6 +355,16 @@
             <property name="text">
              <string>Обратиться в техподдержку</string>
             </property>
+            <property name="icon">
+             <iconset resource="TechSupport.qrc">
+              <normaloff>:/resources/Phone.png</normaloff>:/resources/Phone.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>24</width>
+              <height>24</height>
+             </size>
+            </property>
            </widget>
           </item>
           <item>
@@ -393,12 +413,20 @@
         <property name="text">
          <string>Назад</string>
         </property>
+        <property name="icon">
+         <iconset resource="TechSupport.qrc">
+          <normaloff>:/resources/Backward.png</normaloff>:/resources/Backward.png</iconset>
+        </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="next_btn">
         <property name="text">
          <string>Далее</string>
+        </property>
+        <property name="icon">
+         <iconset resource="TechSupport.qrc">
+          <normaloff>:/resources/Forward.png</normaloff>:/resources/Forward.png</iconset>
         </property>
        </widget>
       </item>
@@ -422,6 +450,8 @@
   <tabstop>prev_btn</tabstop>
   <tabstop>next_btn</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="TechSupport.qrc"/>
+ </resources>
  <connections/>
 </ui>

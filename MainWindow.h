@@ -53,8 +53,6 @@ private:
   checkInfoPage();
 
   Ui::MainWindow* ui_;
-  QList<QPixmap> screenshots_;
-  QList<QLabel> screenshot_perviews_;
   FlowLayout* screenshots_layout_;
 
   SupportRequester support_requester_;

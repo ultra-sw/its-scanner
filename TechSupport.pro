@@ -53,7 +53,8 @@ SOURCES += main.cpp\
     qsmtp/quotedprintable.cpp \
     qsmtp/smtpclient.cpp \
     FileDownloader.cpp \
-    SupportRequester.cpp
+    SupportRequester.cpp \
+    ScreenshotLabel.cpp
 
 HEADERS  += MainWindow.h \
     FlowLayout.h \
@@ -88,6 +89,10 @@ HEADERS  += MainWindow.h \
     qsmtp/smtpexports.h \
     qsmtp/SmtpMime \
     FileDownloader.h \
-    SupportRequester.h
+    SupportRequester.h \
+    ScreenshotLabel.h
 
 FORMS    += MainWindow.ui
+
+RESOURCES += \
+    TechSupport.qrc
