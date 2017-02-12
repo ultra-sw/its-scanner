@@ -25,9 +25,14 @@ void
 FileDownloader::
 fileDownloaded(QNetworkReply* reply)
 {
-  downloaded_data_ = reply->readAll();
-  reply->deleteLater();
-  emit downloaded(downloaded_data_);
+  if(reply->error() == QNetworkReply::NoError)
+  {
+    downloaded_data_ = reply->readAll();
+    reply->deleteLater();
+    emit downloaded(downloaded_data_);
+  }
+  else
+    emit failed();
 }
 //--------------------------------------------------------------------------------------------------
 QByteArray

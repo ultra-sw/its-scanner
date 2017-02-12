@@ -55,6 +55,12 @@ private:
   bool
   checkInfoPage();
 
+  void
+  loadUserParams();
+
+  void
+  saveUserParams();
+
   Ui::MainWindow* ui_;
   QDateTime incident_time_;
   FlowLayout* screenshots_layout_;

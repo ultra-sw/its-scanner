@@ -6,6 +6,7 @@
 #include <QRegExp>
 #include <QClipboard>
 #include <QImage>
+#include <QSettings>
 //--------------------------------------------------------------------------------------------------
 MainWindow::
 MainWindow(QWidget *parent)
@@ -13,6 +14,9 @@ MainWindow(QWidget *parent)
   , ui_(new Ui::MainWindow)
 {
   ui_->setupUi(this);
+
+  loadUserParams();
+
   ui_->close_btn->setVisible(false);
   ui_->prev_btn->setEnabled(false);
   ui_->stacked_widget->setCurrentWidget(ui_->contacts_page);
@@ -39,6 +43,7 @@ MainWindow(QWidget *parent)
 MainWindow::
 ~MainWindow()
 {
+  saveUserParams();
   delete ui_;
 }
 //--------------------------------------------------------------------------------------------------
@@ -179,6 +184,7 @@ void
 MainWindow::
 on_make_request_btn_clicked()
 {
+  saveUserParams();
   ui_->console_text_edit->clear();
   RequestContext ctx;
   if(ui_->this_comp_yes_rbtn->isChecked())
@@ -235,5 +241,27 @@ MainWindow::
 onIncidentTimeChanged(QDateTime const& date_time)
 {
   incident_time_ = date_time;
+}
+//--------------------------------------------------------------------------------------------------
+void
+MainWindow::
+loadUserParams()
+{
+  QSettings settings("TechSupport.ini", QSettings::IniFormat);
+  ui_->name_edit->setText(settings.value("name").toString());
+  ui_->company_edit->setText(settings.value("company").toString());
+  ui_->phone_edit->setText(settings.value("phone").toString());
+  ui_->email_edit->setText(settings.value("email").toString());
+}
+//--------------------------------------------------------------------------------------------------
+void
+MainWindow::
+saveUserParams()
+{
+  QSettings settings("TechSupport.ini", QSettings::IniFormat);
+  settings.setValue("name", ui_->name_edit->text());
+  settings.setValue("company", ui_->company_edit->text());
+  settings.setValue("phone", ui_->phone_edit->text());
+  settings.setValue("email", ui_->email_edit->text());
 }
 //--------------------------------------------------------------------------------------------------

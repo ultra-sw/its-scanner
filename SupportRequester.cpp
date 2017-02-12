@@ -7,6 +7,9 @@
 #include <QBuffer>
 #include <QStringList>
 #include <QSettings>
+#include <QFileInfo>
+//--------------------------------------------------------------------------------------------------
+QString const SupportRequester::DOWNLOAD_URL = "http://integral-info.ru/wp-content/uploads/scan.zip";
 //--------------------------------------------------------------------------------------------------
 SupportRequester::
 SupportRequester(QObject* parent)
@@ -14,7 +17,9 @@ SupportRequester(QObject* parent)
 {
   downloader_ = new FileDownloader(this);
   connect(downloader_, &FileDownloader::downloaded, this, &SupportRequester::fileDownloaded);
+  connect(downloader_, &FileDownloader::failed, this, &SupportRequester::fileDownloadFailed);
   scan_process_ = new QProcess(this);
+  connect(scan_process_, &QProcess::errorOccurred, this, &SupportRequester::scanProcessError);
   connect(scan_process_, SIGNAL(finished(int, QProcess::ExitStatus)),
           this, SLOT(scanProcessFinished(int, QProcess::ExitStatus)));
 }
@@ -26,9 +31,38 @@ start(RequestContext const& ctx)
   if(!tmpdir_.isValid())
     return false;
   ctx_ = ctx;
-  emit log("Скачивание компонентов...");
-  QSettings settings("TechSupport.ini", QSettings::IniFormat);
-  downloader_->download(QUrl(settings.value("download_url").toString()));
+  emit log("Подготовка инструментария...");
+  downloader_->download(QUrl(DOWNLOAD_URL));
+  return true;
+}
+//--------------------------------------------------------------------------------------------------
+bool
+SupportRequester::
+readSettings(QString const& inifile)
+{
+  if(!QFileInfo(inifile).exists())
+    return false;
+
+  QSettings settings(inifile, QSettings::IniFormat);
+  QString smtp_auth = settings.value("smtp_auth").toString();
+  if(smtp_auth == "ssl")
+    request_settings_.conn_type = SmtpClient::SslConnection;
+  else if(smtp_auth == "tls")
+    request_settings_.conn_type = SmtpClient::TlsConnection;
+  else
+    request_settings_.conn_type = SmtpClient::TcpConnection;
+
+  request_settings_.conn_type = SmtpClient::TlsConnection;
+
+  request_settings_.smtp_server = settings.value("smtp_server").toString();
+  request_settings_.smtp_port = settings.value("smtp_port").toInt();
+  request_settings_.smtp_user = settings.value("smtp_user").toString();
+  request_settings_.smtp_password = settings.value("smtp_password").toString();
+  request_settings_.from_email = settings.value("from_email").toString();
+  request_settings_.support_email = settings.value("support_email").toString();
+  request_settings_.support_recipient = settings.value("support_recipient").toString();
+
+  QFile(inifile).remove();
   return true;
 }
 //--------------------------------------------------------------------------------------------------
@@ -39,6 +73,13 @@ fileDownloaded(QByteArray const& data)
   emit log("Распаковка компонентов...");
   QBuffer buffer(const_cast<QByteArray*>(&data));
   JlCompress::extractDir(&buffer, tmpdir_.path());
+
+  QString inifile = tmpdir_.path() + QDir::separator() + "settings.ini";
+  if(!readSettings(inifile))
+  {
+    emit failed("Распаковка компонентов завершилась неудачно.");
+    return;
+  }
 
   emit log("Запуск сбора данных...");
   QString report_dir = tmpdir_.path() + QDir::separator() + "Reports";
@@ -53,41 +94,62 @@ fileDownloaded(QByteArray const& data)
 //--------------------------------------------------------------------------------------------------
 void
 SupportRequester::
+fileDownloadFailed()
+{
+  emit failed("Подготовка инструментария завершилась неудачно.");
+}
+//--------------------------------------------------------------------------------------------------
+void
+SupportRequester::
+scanProcessError(QProcess::ProcessError error)
+{
+  Q_UNUSED(error);
+  sendReport(false);
+}
+//--------------------------------------------------------------------------------------------------
+void
+SupportRequester::
 scanProcessFinished(int code, QProcess::ExitStatus status)
 {
-  if(status == QProcess::CrashExit || code != 0)
-  {
-    emit failed("Сбор данных был завершен неудачно.");
-    return;
-  }
+//  if(status == QProcess::CrashExit || code != 0)
+//  {
+//    emit failed("Сбор данных был завершен неудачно.");
+//    return;
+//  }
+  bool report_exists = (status == QProcess::NormalExit && code == 0);
 
   emit log("Подготовка отчета...");
 
   QString report_file = tmpdir_.path() + QDir::separator() + "report.zip";
-  QString report_dir = tmpdir_.path() + QDir::separator() + "Reports";
-  if(!JlCompress::compressDir(report_file, report_dir))
+  if(report_exists)
   {
-    emit failed("Подготовка отчета не удалась.");
-    return;
+    QString report_dir = tmpdir_.path() + QDir::separator() + "Reports";
+    if(!JlCompress::compressDir(report_file, report_dir))
+    {
+//      emit failed("Подготовка отчета не удалась.");
+//      return;
+      report_exists = false;
+    }
   }
-
+  sendReport(report_exists ? report_file : QString());
+}
+//--------------------------------------------------------------------------------------------------
+void
+SupportRequester::
+sendReport(QString const& report_file)
+{
   emit log("Отправка отчета...");
-  QSettings settings("TechSupport.ini", QSettings::IniFormat);
-  QString smtp_auth = settings.value("smtp_auth").toString();
-  SmtpClient::ConnectionType conn_type = SmtpClient::TcpConnection;
-  if(smtp_auth == "ssl")
-    conn_type = SmtpClient::SslConnection;
-  else if(smtp_auth == "tls")
-    conn_type = SmtpClient::TlsConnection;
-  SmtpClient smtp(settings.value("smtp_server").toString(), settings.value("smtp_port").toInt(),
-                  conn_type);
-  smtp.setUser(settings.value("smtp_user").toString());
-  smtp.setPassword(settings.value("smtp_password").toString());
+  SmtpClient smtp(request_settings_.smtp_server, request_settings_.smtp_port,
+                  request_settings_.conn_type);
+  smtp.setAuthMethod(SmtpClient::AuthLogin);
+  smtp.setUser(request_settings_.smtp_user);
+  smtp.setPassword(request_settings_.smtp_password);
 
   MimeMessage message;
-  message.setSender(new EmailAddress(ctx_.email, ctx_.name));
-  message.addRecipient(new EmailAddress(settings.value("support_email").toString(), "Техподдержка"));
-  message.setSubject(ctx_.subject);
+  message.setSender(new EmailAddress(request_settings_.from_email, ctx_.name));
+  message.addRecipient(new EmailAddress(request_settings_.support_email,
+                                        request_settings_.support_recipient));
+  message.setSubject(ctx_.company + ": " + ctx_.subject);
 
   MimeText text;
   QString header;
@@ -105,10 +167,11 @@ scanProcessFinished(int code, QProcess::ExitStatus status)
     header += "\r\n-------------------------------------------------------\r\n\r\n";
 
   text.setText(QString("%1%2\r\n-------------------------------------------------------\r\n\r\n"
-    "%3\r\nТел: %4").arg(header).arg(ctx_.body).arg(ctx_.company).arg(ctx_.phone));
+    "%3\r\n%4\r\nТел: %5").arg(header).arg(ctx_.body).arg(ctx_.name).arg(ctx_.company).arg(ctx_.phone));
   message.addPart(&text);
 
-  message.addPart(new MimeAttachment(new QFile(report_file)));
+  if(!report_file.isEmpty() && QFileInfo(report_file).exists())
+    message.addPart(new MimeAttachment(new QFile(report_file)));
 
   int number = 0;
   for(QPixmap const& screenshot : ctx_.screenshots)

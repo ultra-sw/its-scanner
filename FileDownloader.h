@@ -23,6 +23,9 @@ class FileDownloader : public QObject
   void
   downloaded(QByteArray const& data);
 
+  void
+  failed();
+
  private slots:
   void
   fileDownloaded(QNetworkReply* pReply);
