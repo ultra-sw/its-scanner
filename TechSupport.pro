@@ -96,3 +96,5 @@ FORMS    += MainWindow.ui
 
 RESOURCES += \
     TechSupport.qrc
+
+RC_FILE = TechSupport.rc

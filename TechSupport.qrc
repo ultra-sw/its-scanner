@@ -6,5 +6,6 @@
         <file>resources/Ok.png</file>
         <file>resources/Phone.png</file>
         <file>resources/Picture.png</file>
+        <file>resources/Gear.png</file>
     </qresource>
 </RCC>

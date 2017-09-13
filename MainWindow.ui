@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Техподдержка</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="TechSupport.qrc">
+    <normaloff>:/resources/Gear.png</normaloff>:/resources/Gear.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
  font-size: 12px;
@@ -309,8 +313,8 @@ p, li { white-space: pre-wrap; }
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>458</width>
-             <height>256</height>
+             <width>98</width>
+             <height>28</height>
             </rect>
            </property>
           </widget>
