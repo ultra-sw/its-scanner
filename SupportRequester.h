@@ -25,6 +25,18 @@ struct RequestContext
   QList<QPixmap> screenshots;
 };
 //--------------------------------------------------------------------------------------------------
+struct RequestSettings
+{
+  SmtpClient::ConnectionType conn_type;
+  QString smtp_server;
+  int smtp_port;
+  QString smtp_user;
+  QString smtp_password;
+  QString from_email;
+  QString support_email;
+  QString support_recipient;
+};
+//--------------------------------------------------------------------------------------------------
 class SupportRequester : public QObject
 {
   Q_OBJECT
@@ -32,7 +44,22 @@ public:
   explicit SupportRequester(QObject* parent = nullptr);
 
   bool
-  start(RequestContext const& ctx);
+  start(RequestSettings const& settings, RequestContext const& ctx);
+
+  void
+  setDownloadUrl(QString const& url)
+  {
+    download_url_ = url;
+  }
+
+  QString
+  downloadUrl() const
+  {
+    return download_url_;
+  }
+
+  bool
+  checkSettings(RequestSettings const& settings, QString& error_text);
 
 signals:
   void
@@ -58,20 +85,7 @@ private slots:
   scanProcessError(QProcess::ProcessError error);
 
 private:
-  struct RequestSettings
-  {
-    SmtpClient::ConnectionType conn_type;
-    QString smtp_server;
-    int smtp_port;
-    QString smtp_user;
-    QString smtp_password;
-    QString from_email;
-    QString support_email;
-    QString support_recipient;
-  };
-
-  bool
-  readSettings(QString const& inifile);
+  static QString const DEFAULT_DOWNLOAD_URL;
 
   void
   sendReport(QString const& report_file);
@@ -81,6 +95,6 @@ private:
   QProcess* scan_process_;
   RequestContext ctx_;
   RequestSettings request_settings_;
-  static QString const DOWNLOAD_URL;
+  QString download_url_;
 };
 //--------------------------------------------------------------------------------------------------

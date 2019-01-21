@@ -7,5 +7,6 @@
         <file>resources/Phone.png</file>
         <file>resources/Picture.png</file>
         <file>resources/Gear.png</file>
+        <file>resources/Refresh.png</file>
     </qresource>
 </RCC>

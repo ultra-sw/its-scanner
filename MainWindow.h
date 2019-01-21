@@ -1,5 +1,6 @@
 #pragma once
 #include "SupportRequester.h"
+#include "FileDownloader.h"
 #include <QMainWindow>
 #include <QList>
 #include <QPixmap>
@@ -22,6 +23,9 @@ public:
 
 private slots:
   void
+  on_check_settings_btn_clicked();
+
+  void
   on_next_btn_clicked();
 
   void
@@ -34,6 +38,9 @@ private slots:
   on_make_request_btn_clicked();
 
   void
+  getParamsFromServer();
+
+  void
   appendLog(QString const& message);
 
   void
@@ -44,6 +51,12 @@ private slots:
 
   void
   onIncidentTimeChanged(QDateTime const& date_time);
+
+  void
+  fileDownloaded(QByteArray const& data);
+
+  void
+  fileDownloadFailed();
 
 private:
   void
@@ -61,10 +74,21 @@ private:
   void
   saveUserParams();
 
+  RequestSettings
+  prepareRequest() const;
+
+  QString
+  encrypt(QString const& data);
+
+  QString
+  decrypt(QString const& data);
+
+  static quint64 const SALT;
   Ui::MainWindow* ui_;
   QDateTime incident_time_;
   FlowLayout* screenshots_layout_;
 
   SupportRequester support_requester_;
+  FileDownloader downloader_;
 };
 //--------------------------------------------------------------------------------------------------

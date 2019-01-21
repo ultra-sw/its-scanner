@@ -9,11 +9,12 @@
 #include <QSettings>
 #include <QFileInfo>
 //--------------------------------------------------------------------------------------------------
-QString const SupportRequester::DOWNLOAD_URL = "http://integral-info.ru/wp-content/uploads/scan.zip";
+QString const SupportRequester::DEFAULT_DOWNLOAD_URL = "http://integral-info.ru/wp-content/uploads";
 //--------------------------------------------------------------------------------------------------
 SupportRequester::
 SupportRequester(QObject* parent)
   : QObject(parent)
+  , download_url_(DEFAULT_DOWNLOAD_URL)
 {
   downloader_ = new FileDownloader(this);
   connect(downloader_, &FileDownloader::downloaded, this, &SupportRequester::fileDownloaded);
@@ -26,43 +27,14 @@ SupportRequester(QObject* parent)
 //--------------------------------------------------------------------------------------------------
 bool
 SupportRequester::
-start(RequestContext const& ctx)
+start(RequestSettings const& settings, RequestContext const& ctx)
 {
   if(!tmpdir_.isValid())
     return false;
+  request_settings_ = settings;
   ctx_ = ctx;
   emit log("Подготовка инструментария...");
-  downloader_->download(QUrl(DOWNLOAD_URL));
-  return true;
-}
-//--------------------------------------------------------------------------------------------------
-bool
-SupportRequester::
-readSettings(QString const& inifile)
-{
-  if(!QFileInfo(inifile).exists())
-    return false;
-
-  QSettings settings(inifile, QSettings::IniFormat);
-  QString smtp_auth = settings.value("smtp_auth").toString();
-  if(smtp_auth == "ssl")
-    request_settings_.conn_type = SmtpClient::SslConnection;
-  else if(smtp_auth == "tls")
-    request_settings_.conn_type = SmtpClient::TlsConnection;
-  else
-    request_settings_.conn_type = SmtpClient::TcpConnection;
-
-  request_settings_.conn_type = SmtpClient::TlsConnection;
-
-  request_settings_.smtp_server = settings.value("smtp_server").toString();
-  request_settings_.smtp_port = settings.value("smtp_port").toInt();
-  request_settings_.smtp_user = settings.value("smtp_user").toString();
-  request_settings_.smtp_password = settings.value("smtp_password").toString();
-  request_settings_.from_email = settings.value("from_email").toString();
-  request_settings_.support_email = settings.value("support_email").toString();
-  request_settings_.support_recipient = settings.value("support_recipient").toString();
-
-  QFile(inifile).remove();
+  downloader_->download(QUrl(download_url_ + "/scan.zip"));
   return true;
 }
 //--------------------------------------------------------------------------------------------------
@@ -72,10 +44,8 @@ fileDownloaded(QByteArray const& data)
 {
   emit log("Распаковка компонентов...");
   QBuffer buffer(const_cast<QByteArray*>(&data));
-  JlCompress::extractDir(&buffer, tmpdir_.path());
-
-  QString inifile = tmpdir_.path() + QDir::separator() + "settings.ini";
-  if(!readSettings(inifile))
+  QStringList files = JlCompress::extractDir(&buffer, tmpdir_.path());
+  if(files.isEmpty())
   {
     emit failed("Распаковка компонентов завершилась неудачно.");
     return;
@@ -125,11 +95,7 @@ scanProcessFinished(int code, QProcess::ExitStatus status)
   {
     QString report_dir = tmpdir_.path() + QDir::separator() + "Reports";
     if(!JlCompress::compressDir(report_file, report_dir))
-    {
-//      emit failed("Подготовка отчета не удалась.");
-//      return;
       report_exists = false;
-    }
   }
   sendReport(report_exists ? report_file : QString());
 }
@@ -206,5 +172,29 @@ sendReport(QString const& report_file)
   smtp.quit();
 
   emit finished();
+}
+//--------------------------------------------------------------------------------------------------
+bool
+SupportRequester::
+checkSettings(RequestSettings const& settings, QString& error_text)
+{
+  SmtpClient smtp(settings.smtp_server, settings.smtp_port, settings.conn_type);
+  smtp.setAuthMethod(SmtpClient::AuthLogin);
+  smtp.setUser(settings.smtp_user);
+  smtp.setPassword(settings.smtp_password);
+
+  if(!smtp.connectToHost())
+  {
+    error_text = "Не удалось подключиться к почтовому серверу.";
+    return false;
+  }
+
+  if(!smtp.login())
+  {
+    error_text = "Не удалось авторизоваться на почтовом сервере.";
+    return false;
+  }
+
+  return true;
 }
 //--------------------------------------------------------------------------------------------------

@@ -54,7 +54,8 @@ SOURCES += main.cpp\
     qsmtp/smtpclient.cpp \
     FileDownloader.cpp \
     SupportRequester.cpp \
-    ScreenshotLabel.cpp
+    ScreenshotLabel.cpp \
+    SimpleCrypt.cpp
 
 HEADERS  += MainWindow.h \
     FlowLayout.h \
@@ -90,7 +91,8 @@ HEADERS  += MainWindow.h \
     qsmtp/SmtpMime \
     FileDownloader.h \
     SupportRequester.h \
-    ScreenshotLabel.h
+    ScreenshotLabel.h \
+    SimpleCrypt.h
 
 FORMS    += MainWindow.ui
 
